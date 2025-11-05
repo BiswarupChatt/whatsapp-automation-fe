@@ -1,14 +1,17 @@
 import React from "react";
-import { CssBaseline, Container } from "@mui/material";
+import { Container, Stack } from "@mui/material";
+import ConnectionManager from "./components/ConnectionManager";
 import MessageForm from "./components/MessageForm";
 
-export default function App() {
+function App() {
   return (
-    <>
-      <CssBaseline />
-      <Container>
+    <Container sx={{ py: 4 }}>
+      <Stack spacing={4}>
+        <ConnectionManager />
         <MessageForm />
-      </Container>
-    </>
+      </Stack>
+    </Container>
   );
 }
+
+export default App;
