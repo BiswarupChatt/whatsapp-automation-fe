@@ -33,6 +33,7 @@ export default function ConnectionManager() {
         };
 
 
+
         return () => ws.close();
     }, []);
 
@@ -79,7 +80,7 @@ export default function ConnectionManager() {
 
             {!connected && !qrText && (
                 <Box mt={2}>
-                    <CircularProgress />
+                    {/* <CircularProgress /> */}
                     <Typography variant="body2" mt={1}>
                         Waiting for QR code...
                     </Typography>
