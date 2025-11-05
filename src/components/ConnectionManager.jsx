@@ -6,6 +6,7 @@ export default function ConnectionManager() {
     const [connected, setConnected] = useState(false);
     const [user, setUser] = useState(null);
     const [qrText, setQrText] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const ws = new WebSocket("ws://localhost:5000");
@@ -25,17 +26,37 @@ export default function ConnectionManager() {
                 setConnected(false);
                 setUser(null);
             } else if (event === "status") {
-                // 👇 Handle initial state sync
                 setConnected(data.connected);
                 if (data.user) setUser(data.user);
                 if (!data.connected && data.qr) setQrText(data.qr);
             }
         };
 
-
-
         return () => ws.close();
     }, []);
+
+    // 👇 Function to disconnect WhatsApp session
+    const handleDisconnect = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch("http://localhost:5000/api/reset-session", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
+            const data = await res.json();
+            if (data.success) {
+                setConnected(false);
+                setUser(null);
+                setQrText(null);
+            } else {
+                alert("Failed to disconnect: " + data.error);
+            }
+        } catch (error) {
+            alert("Error disconnecting: " + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <Box
@@ -59,32 +80,45 @@ export default function ConnectionManager() {
                     <Typography color="green" variant="body1">
                         ✅ Connected to WhatsApp
                     </Typography>
+
                     {user && (
                         <Typography sx={{ mt: 1 }} color="text.secondary">
                             Logged in as: <strong>{user.name}</strong> ({user.number})
                         </Typography>
                     )}
+
+                    {/* 👇 Disconnect button shown only when connected */}
+                    <Box mt={3}>
+                        <Button
+                            variant="outlined"
+                            color="error"
+                            onClick={handleDisconnect}
+                            disabled={loading}
+                        >
+                            {loading ? "Disconnecting..." : "Disconnect"}
+                        </Button>
+                    </Box>
                 </>
             ) : (
-                <Typography color="error" variant="body1">
-                    ❌ Not Connected
-                </Typography>
-            )}
-
-            {!connected && qrText && (
-                <Box mt={2}>
-                    <Typography variant="body2">Scan this QR with WhatsApp:</Typography>
-                    <QRCodeSVG value={qrText} size={250} includeMargin={true} />
-                </Box>
-            )}
-
-            {!connected && !qrText && (
-                <Box mt={2}>
-                    {/* <CircularProgress /> */}
-                    <Typography variant="body2" mt={1}>
-                        Waiting for QR code...
+                <>
+                    <Typography color="error" variant="body1">
+                        ❌ Not Connected
                     </Typography>
-                </Box>
+
+                    {qrText ? (
+                        <Box mt={2}>
+                            <Typography variant="body2">Scan this QR with WhatsApp:</Typography>
+                            <QRCodeSVG value={qrText} size={250} includeMargin={true} />
+                        </Box>
+                    ) : (
+                        <Box mt={2}>
+                            <CircularProgress size={24} />
+                            <Typography variant="body2" mt={1}>
+                                Waiting for QR code...
+                            </Typography>
+                        </Box>
+                    )}
+                </>
             )}
         </Box>
     );
