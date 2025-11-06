@@ -83,7 +83,7 @@ export default function ConnectionManager() {
 
                     {user && (
                         <Typography sx={{ mt: 1 }} color="text.secondary">
-                            Logged in as: <strong>{user.name}</strong> ({user.number})
+                            Logged in as: <strong>{user.name} {user.number}</strong>
                         </Typography>
                     )}
 
@@ -113,7 +113,7 @@ export default function ConnectionManager() {
                     ) : (
                         <Box mt={2}>
                             <CircularProgress size={24} />
-                            <Typography variant="body2" mt={1}>
+                            <Typography color="black" variant="body2" mt={1}>
                                 Waiting for QR code...
                             </Typography>
                         </Box>
